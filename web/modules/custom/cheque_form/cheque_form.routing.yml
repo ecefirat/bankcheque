@@ -1,0 +1,7 @@
+cheque_form.custom_form:
+  path: "custom-form"
+  defaults:
+    _form: '\Drupal\cheque_form\Form\bankchequeform'
+    _title: "Bank Cheque Form"
+  requirements:
+    _permission: 'access content,access user profiles'

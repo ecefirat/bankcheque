@@ -1,0 +1,5 @@
+name: Cheque Form
+description: Custom Form
+type: module
+core: 8.x
+package: custom
