@@ -2,3 +2,10 @@
  * If using a CSS pre-processor, tell it to overwrite this file. If not, place
  * your custom CSS modifications here.
  */
+
+ .alert-success {
+     display: flex;
+     color: black;
+     background-color: white;
+     border: 2px black solid
+ }
