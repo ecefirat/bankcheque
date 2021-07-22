@@ -4,4 +4,4 @@ cheque_form.custom_form:
     _form: '\Drupal\cheque_form\Form\bankchequeform'
     _title: "Bank Cheque Form"
   requirements:
-    _permission: 'access content,access user profiles'
+    _permission: 'access content'
