@@ -32,6 +32,7 @@ class bankchequeform extends FormBase {
             '#title' => $this->t('Last Name'),
             '#maxlength' => 20,
             '#required' => TRUE,
+            
         ];
 
         $form['payee_name'] = [
@@ -57,45 +58,48 @@ class bankchequeform extends FormBase {
         '#disabled' => TRUE,
        ];
 
-//        $form['sum2'] = [
-//         '#type' => 'number',
-//         '#title' => $this->t('The Sum'),
-//         '#required' => TRUE,
-//    ];
-
         $form['submit'] = [
             '#type' => 'submit',
             '#value' => $this->t('submit')
         ];
 
-        
-
         return $form;
     }
 
     /**
- * {@inheritdoc}
- */
+     * {@inheritdoc}
+    */
 public function validateForm(array &$form, FormStateInterface $form_state) {
+
+// Not very happy with the coding and way of validation. 
+// I am sure there must be a better way without the repetitions and to check the character input.
+// For some reason !is_string didn't work.
+// preg_match is kind of a hacky way but I wanted to put some validation other than cheking the numeric values.
+
     if(is_numeric($form_state->getValue('first_name'))) {
         $form_state->setErrorByName('first_name', $this->t.('Error, The first name must be a string.'));
     }
-
-
-
-
-    // if(strlen($form_state->getValue('first_name')) < 1) {
-    //     $form_state->setErrorByName('first_name', $this->t('The fname is too short.'));
-    // }
-    // if(strlen($form_state->getValue('last_name')) < 1) {
-    //     $form_state->setErrorByName('last_name', $this->t('The lname is too short.'));
-    // }
-    // if(strlen($form_state->getValue('payee_name')) < 1) {
-    //     $form_state->setErrorByName('payee_name', $this->t('The pname is too short.'));
-    // }
-    if (strlen($form_state->getValue('sum')) < 3) {
-        $form_state->setErrorByName('sum', $this->t('The sum is must be more than $99.'));
+     if(is_numeric($form_state->getValue('last_name'))) {
+        $form_state->setErrorByName('last_name', $this->t.('Error, The last name must be a string.'));
+    } 
+     if(is_numeric($form_state->getValue('payee_name'))) {
+        $form_state->setErrorByName('payee_name', $this->t.('Error, The payee name must be a string.'));
+    }
+    if (($form_state->getValue('sum')) < 9) {
+        $form_state->setErrorByName('sum', $this->t('The sum must be more than $9.'));
       }
+
+      $value = [$form_state->getValue('first_name'), $form_state->getValue('last_name'), $form_state->getValue('payee_name')];
+      $pattern = '/[\'\/~`\!@#\$%\^&\*\(\)_\-\+=\{\}\[\]\|;:"\<\>,\.\?\\\]/';
+      if(preg_match($pattern, $value[0])) {
+          $form_state->setErrorByName('first_name', $this->t('Names consist of letters only. @name', array('@name' => $value)));
+      } 
+      if(preg_match($pattern, $value[1])) {
+        $form_state->setErrorByName('last_name', $this->t('Names consist of letters only. @name', array('@name' => $value)));
+    } 
+    if(preg_match($pattern, $value[2])) {
+        $form_state->setErrorByName('payee_name', $this->t('Names consist of letters only. @name', array('@name' => $value)));
+    } 
   
   }
   
@@ -105,16 +109,18 @@ public function validateForm(array &$form, FormStateInterface $form_state) {
      */
 
     public function submitForm(array &$form, FormStateInterface $form_state) {
+
         $this->messenger()->addStatus($this->t('@payee', ['@payee' => $form_state->getValue('payee_name')]));
         $this->messenger()->addStatus($this->t('@sum', ['@sum' => ($form_state->getValue('sum'))]));
-  
         drupal_set_message($this->t('@name @last', array('@name' => $form_state->getValue('first_name'), '@last' => $form_state->getValue('last_name'))));
+        drupal_set_message($form_state->getValue('date'));
 
-            drupal_set_message($form_state->getValue('date'));
 
-            // drupal_set_message('' .print_r($form,TRUE). '');
-        
-            // $thesum = new NumberFormatter("en", NumberFormatter::SPELLOUT);
-            // drupal_set_message($form_state->getValue($thesum->format(32)));
+    // Couldn't install the intl hence the number formatter. Hoping to find a way to convert numbers to words through this.
+
+        // $value = $form_state->getValue('sum');
+        // $thesum = new NumberFormatter("en", NumberFormatter::SPELLOUT);
+        // drupal_set_message($form_state->getValue($thesum->format($value)));
+
 }
 }
