@@ -47,6 +47,8 @@ class bankchequeform extends FormBase {
             '#required' => TRUE,
        ];
 
+     
+
        $form['date'] = [
         '#type' => 'hidden',
         '#title' => t('Date'),
@@ -54,6 +56,12 @@ class bankchequeform extends FormBase {
         '#default_value' =>date('d-m-Y'),
         '#disabled' => TRUE,
        ];
+
+//        $form['sum2'] = [
+//         '#type' => 'number',
+//         '#title' => $this->t('The Sum'),
+//         '#required' => TRUE,
+//    ];
 
         $form['submit'] = [
             '#type' => 'submit',
@@ -97,11 +105,16 @@ public function validateForm(array &$form, FormStateInterface $form_state) {
      */
 
     public function submitForm(array &$form, FormStateInterface $form_state) {
-        $this->messenger()->addStatus($this->t('Pay @payee', ['@payee' => $form_state->getValue('payee_name')]));
-        $this->messenger()->addStatus($this->t('The sum of @sum', ['@sum' => $form_state->getValue('sum')]));
+        $this->messenger()->addStatus($this->t('@payee', ['@payee' => $form_state->getValue('payee_name')]));
+        $this->messenger()->addStatus($this->t('@sum', ['@sum' => ($form_state->getValue('sum'))]));
   
-        drupal_set_message($this->t('From @name @last', array('@name' => $form_state->getValue('first_name'), '@last' => $form_state->getValue('last_name'))));
+        drupal_set_message($this->t('@name @last', array('@name' => $form_state->getValue('first_name'), '@last' => $form_state->getValue('last_name'))));
 
             drupal_set_message($form_state->getValue('date'));
+
+            // drupal_set_message('' .print_r($form,TRUE). '');
+        
+            // $thesum = new NumberFormatter("en", NumberFormatter::SPELLOUT);
+            // drupal_set_message($form_state->getValue($thesum->format(32)));
 }
 }
