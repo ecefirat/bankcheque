@@ -1,20 +1,5 @@
 <?php
 
-// First of all, I would like to thank you for this challenge and the opportuniy. 
-// Thank you because I was so excited these last two days and learned a lot.
-
-// And challenge because almost everything I did in this project, I learned them in the last two days. 
-// My previous experience with Drupal was only through the UI and without deployment, so everything in this project was new to me.
-// For that reason, I am not very satisfied with the outcome and I wanted to let you know about it.
-
-
-// First, I started playing to undertsand which files interact with the page and do what and was playing with the Status/Error messages after building the form. 
-// That's why I kept on going from there and in the end,
-// instead of redirecting the user to a new page after form submission, I kind of ended up with changing the styling of the status message to display the bank cheque. 
-
-// Finally, I really couldn't find enough information on the internet for deployment, hence the project is unfortunately undeployed. 
-// The good thing is most of the functionality works :)
-
 namespace Drupal\cheque_form\Form;
 
 use Drupal\Core\Form\FormBase;
@@ -39,21 +24,21 @@ class bankchequeform extends FormBase {
             '#type' => 'textfield',
             '#title' => $this->t('First Name'),
             '#maxlength' => 20,
-            '#required' => TRUE,
+            // '#required' => TRUE,
         ];
 
         $form['last_name'] = [
             '#type' => 'textfield',
             '#title' => $this->t('Last Name'),
             '#maxlength' => 20,
-            '#required' => TRUE,
+            // '#required' => TRUE,
         ];
 
         $form['payee_name'] = [
             '#type' => 'textfield',
             '#title' => $this->t('Payee Name'),
             '#maxlength' => 40,
-            '#required' => TRUE,
+            // '#required' => TRUE,
         ];
 
         $form['sum'] = [
@@ -83,11 +68,6 @@ class bankchequeform extends FormBase {
     */
     public function validateForm(array &$form, FormStateInterface $form_state) {
 
-// Not very happy with the coding and way of validation. 
-// I am sure there must be a better way without the repetitions and to check the character input.
-// For some reason !is_string didn't work.
-// preg_match is kind of a hacky way but I wanted to put some validation other than just checking is_numeric.
-
     if(is_numeric($form_state->getValue('first_name'))) {
         $form_state->setErrorByName('first_name', $this->t.('Error, The first name must be a string.'));
     }
@@ -97,7 +77,7 @@ class bankchequeform extends FormBase {
      if(is_numeric($form_state->getValue('payee_name'))) {
         $form_state->setErrorByName('payee_name', $this->t.('Error, The payee name must be a string.'));
     }
-    if (($form_state->getValue('sum')) < 9) {
+    if (($form_state->getValue('sum')) < 10) {
         $form_state->setErrorByName('sum', $this->t('The sum must be more than $9.'));
     }
 
@@ -122,16 +102,85 @@ class bankchequeform extends FormBase {
     public function submitForm(array &$form, FormStateInterface $form_state) {
 
         $this->messenger()->addStatus($this->t('@payee', ['@payee' => $form_state->getValue('payee_name')]));
-        $this->messenger()->addStatus($this->t('@sum', ['@sum' => ($form_state->getValue('sum'))]));
+        $this->messenger()->addStatus($this->t('@sum', ['@sum' => number_format($form_state->getValue('sum'))]));
+
+        $ones = array(
+            0 =>"ZERO",
+            1 => "ONE",
+            2 => "TWO",
+            3 => "THREE",
+            4 => "FOUR",
+            5 => "FIVE",
+            6 => "SIX",
+            7 => "SEVEN",
+            8 => "EIGHT",
+            9 => "NINE",
+            10 => "TEN",
+            11 => "ELEVEN",
+            12 => "TWELVE",
+            13 => "THIRTEEN",
+            14 => "FOURTEEN",
+            15 => "FIFTEEN",
+            16 => "SIXTEEN",
+            17 => "SEVENTEEN",
+            18 => "EIGHTEEN",
+            19 => "NINETEEN",
+            );
+            $tens = array( 
+            0 => "ZERO",
+            1 => "TEN",
+            2 => "TWENTY",
+            3 => "THIRTY", 
+            4 => "FORTY", 
+            5 => "FIFTY", 
+            6 => "SIXTY", 
+            7 => "SEVENTY", 
+            8 => "EIGHTY", 
+            9 => "NINETY" 
+            ); 
+            $hundreds = array( 
+            "HUNDRED", 
+            "THOUSAND", 
+            "MILLION", 
+            "BILLION", 
+            "TRILLION", 
+            "QUARDRILLION" 
+            );
+
+        $sum = $form_state->getValue('sum');
+        $num = number_format($sum, 2, ".", ",");
+        $num_arr = explode(".", $num);
+        $wholenum = $num_arr[0];
+        $whole_arr = array_reverse(explode(",", $wholenum));
+        $rettxt = "";
+        $singles = "";
+        foreach($whole_arr as $key => $i) {
+            while(substr($i, 0, 1) == "0")
+                $i = substr($i, 1, 5);
+                if($i < 20) {
+                    $singles .= " ".$ones[$i];
+                } 
+                elseif($i < 100) {
+                    if(substr($i,0,1)!="0")  $rettxt .= $tens[substr($i,0,1)]; 
+                    if(substr($i,1,1)!="0") $rettxt .= " ".$ones[substr($i,1,1)]; 
+                } 
+                else {
+                    if(substr($i,0,1)!="0") $rettxt .= $ones[substr($i,0,1)]." ".$hundreds[0]; 
+                    if(substr($i,1,1)!="0")$rettxt .= " and ".$tens[substr($i,1,1)]; 
+                    if(substr($i,2,1)!="0")$rettxt .= " ".$ones[substr($i,2,1)]; 
+                } if($key > 0){ 
+                    $singles .= " ".$hundreds[$key]." "; 
+                }
+                $rettxt = $singles . $rettxt;
+                $text = strtolower($rettxt);
+                $text = ucwords($text);
+        }
+            
+        
+
+        $this->messenger()->addStatus($this->t('@sum', ['@sum' => ($text)]));
+        
         drupal_set_message($this->t('@name @last', array('@name' => $form_state->getValue('first_name'), '@last' => $form_state->getValue('last_name'))));
         drupal_set_message($form_state->getValue('date'));
-
-
-    // Couldn't install the intl hence the number formatter. Was hoping to find a way to convert numbers to words through this to start with.
-
-        // $value = $form_state->getValue('sum');
-        // $thesum = new NumberFormatter("en", NumberFormatter::SPELLOUT);
-        // drupal_set_message($form_state->getValue($thesum->format($value)));
-
 }
 }
