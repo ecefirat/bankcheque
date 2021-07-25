@@ -24,21 +24,21 @@ class bankchequeform extends FormBase {
             '#type' => 'textfield',
             '#title' => $this->t('First Name'),
             '#maxlength' => 20,
-            // '#required' => TRUE,
+            '#required' => TRUE,
         ];
 
         $form['last_name'] = [
             '#type' => 'textfield',
             '#title' => $this->t('Last Name'),
             '#maxlength' => 20,
-            // '#required' => TRUE,
+            '#required' => TRUE,
         ];
 
         $form['payee_name'] = [
             '#type' => 'textfield',
             '#title' => $this->t('Payee Name'),
             '#maxlength' => 40,
-            // '#required' => TRUE,
+            '#required' => TRUE,
         ];
 
         $form['sum'] = [
@@ -150,31 +150,29 @@ class bankchequeform extends FormBase {
         $sum = $form_state->getValue('sum');
         $num = number_format($sum);
         $num_arr = array_reverse(explode(",", $num));
-        krsort($num_arr, 1);
-        $rettxt = "";
+        krsort($num_arr);
+        $text = "";
         foreach($num_arr as $key => $i) {
             while(substr($i, 0, 1) == "0")
                 $i = substr($i, 1, 5);
                 if($i < 20) {
-                    $rettxt .= " ".$ones[$i];
+                    $text .= " ".$ones[$i];
                 } 
                 elseif($i < 100) {
-                    if(substr($i,0,1)!="0")  $rettxt .= $tens[substr($i,0,1)]; 
-                    if(substr($i,1,1)!="0") $rettxt .= " ".$ones[substr($i,1,1)]; 
+                    if(substr($i,0,1)!="0")  $text .= $tens[substr($i,0,1)]; 
+                    if(substr($i,1,1)!="0") $text .= " ".$ones[substr($i,1,1)]; 
                 } 
                 else {
-                    if(substr($i,0,1)!="0") $rettxt .= $ones[substr($i,0,1)]." ".$hundreds[0]; 
-                    if(substr($i,1,1)!="0")$rettxt .= " and ".$tens[substr($i,1,1)]; 
-                    if(substr($i,2,1)!="0")$rettxt .= " ".$ones[substr($i,2,1)]; 
-                } if($key > 0){ 
-                    $rettxt .= " ".$hundreds[$key]." ";
+                    if(substr($i,0,1)!="0") $text .= $ones[substr($i,0,1)]." ".$hundreds[0]; 
+                    if(substr($i,1,1)!="0")$text .= " and ".$tens[substr($i,1,1)]; 
+                    if(substr($i,2,1)!="0")$text .= " ".$ones[substr($i,2,1)];
+                } if($key) { 
+                    $text .= " ".$hundreds[$key]." ";
                 }
-                $text = strtolower($rettxt);
+                $text = strtolower($text);
                 $text = ucwords($text);
         }
             
-        
-
         $this->messenger()->addStatus($this->t('@sum', ['@sum' => ($text)]));
         
         drupal_set_message($this->t('@name @last', array('@name' => $form_state->getValue('first_name'), '@last' => $form_state->getValue('last_name'))));
