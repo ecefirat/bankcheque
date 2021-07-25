@@ -148,17 +148,15 @@ class bankchequeform extends FormBase {
             );
 
         $sum = $form_state->getValue('sum');
-        $num = number_format($sum, 2, ".", ",");
-        $num_arr = explode(".", $num);
-        $wholenum = $num_arr[0];
-        $whole_arr = array_reverse(explode(",", $wholenum));
+        $num = number_format($sum);
+        $num_arr = array_reverse(explode(",", $num));
+        krsort($num_arr, 1);
         $rettxt = "";
-        $singles = "";
-        foreach($whole_arr as $key => $i) {
+        foreach($num_arr as $key => $i) {
             while(substr($i, 0, 1) == "0")
                 $i = substr($i, 1, 5);
                 if($i < 20) {
-                    $singles .= " ".$ones[$i];
+                    $rettxt .= " ".$ones[$i];
                 } 
                 elseif($i < 100) {
                     if(substr($i,0,1)!="0")  $rettxt .= $tens[substr($i,0,1)]; 
@@ -169,9 +167,8 @@ class bankchequeform extends FormBase {
                     if(substr($i,1,1)!="0")$rettxt .= " and ".$tens[substr($i,1,1)]; 
                     if(substr($i,2,1)!="0")$rettxt .= " ".$ones[substr($i,2,1)]; 
                 } if($key > 0){ 
-                    $singles .= " ".$hundreds[$key]." "; 
+                    $rettxt .= " ".$hundreds[$key]." ";
                 }
-                $rettxt = $singles . $rettxt;
                 $text = strtolower($rettxt);
                 $text = ucwords($text);
         }
